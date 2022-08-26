@@ -1,0 +1,42 @@
+import { GitHubIcon } from '@/icons/GitHub';
+import { GoogleIcon } from '@/icons/GoogleIcon';
+import { IgniteIcon } from '@/icons/Ignite';
+import { TwitterIcon } from '@/icons/TwitterIcon';
+
+export default function LoginPage() {
+  return (
+    <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] min-h-screen">
+      <img className="w-full h-full object-cover hidden lg:block" src="/login.jpg" alt="" />
+
+      <div className="py-[62px] px-16 bg-gray-2">
+        <p className="text-2xl font-bold text-gray-7 flex items-center gap-4">
+          <IgniteIcon />
+          Ignite Feed
+        </p>
+
+        <h1 className="text-[40px] font-bold max-w-[17ch] text-white mt-20">
+          Escolha uma opção para entrar
+        </h1>
+
+        <p className="mt-4 mb-14 text-gray-5">
+          Utilize algum dos serviços abaixo para entrar na nossa plataforma.
+        </p>
+
+        <div className="space-y-6">
+          <button className="py-3.5 bg-[#EA4335] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
+            <GoogleIcon width="24px" height="24px" />
+            Entrar com o Google
+          </button>
+          <button className="py-3.5 bg-[#1DA1F2] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
+            <TwitterIcon width='24px' height='24px' />
+            Entrar com o Twitter
+          </button>
+          <button className="py-3.5 bg-[#171515] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
+            <GitHubIcon width='24px' height='24px' />
+            Entrar com o GitHub
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
