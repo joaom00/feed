@@ -35,6 +35,25 @@ const Home = () => {
         </aside>
         <div className="space-y-8">
           <div className="bg-gray-2 rounded-lg p-10">
+            <div className="grid grid-cols-[60px_1fr] gap-4">
+              <div className="w-[60px] h-[60px] rounded-lg bg-gray-2 border-2 border-brand-green-light flex justify-center items-center">
+                <img
+                  className="w-[49px] h-[49px] rounded-[5px]"
+                  src="https://github.com/joaom00.png"
+                  alt="Foto de perfil de João Pedro"
+                />
+              </div>
+
+              <textarea
+                className="w-full rounded-lg bg-gray-1 px-4 py-[13px] placeholder:text-gray-4 text-gray-6 min-h-[96px] focus:outline-none focus:outline-brand-green-light"
+                placeholder="Escreva um comentário..."
+              />
+              <button className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none mt-4 col-start-2 w-max">
+                Publicar
+              </button>
+            </div>
+          </div>
+          <div className="bg-gray-2 rounded-lg p-10">
             <div className="grid grid-cols-[60px_1fr_auto] gap-4 items-center">
               <div className="w-[60px] h-[60px] rounded-lg bg-gray-2 border-2 border-brand-green-light flex justify-center items-center">
                 <img
