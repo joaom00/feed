@@ -1,7 +1,6 @@
 import React from 'react';
+import { useSession } from 'next-auth/react';
 import { Prisma } from '@prisma/client';
-import { formatDistanceToNow } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
 
 import prisma from '@/lib/prisma';
 
@@ -11,12 +10,16 @@ import { Textarea } from '@/components/Textarea';
 import { EditIcon } from '../icons/EditIcon';
 import { IgniteIcon } from '../icons/Ignite';
 import { Spinner } from '@/icons/Spinner';
+import { Post } from '@/components/Post';
 
-const postsWithAuthor = Prisma.validator<Prisma.PostArgs>()({
+const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
+  orderBy: {
+    createdAt: 'desc'
+  },
   include: { author: true }
 });
 
-type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & { createdAt: string };
+export type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & { createdAt: string };
 
 export const getServerSideProps = async () => {
   const posts = await prisma.post.findMany(postsWithAuthor);
@@ -29,6 +32,7 @@ export const getServerSideProps = async () => {
 };
 
 const Home = ({ posts }: { posts: Array<Post> }) => {
+  const session = useSession();
   const [isLoading, setIsLoading] = React.useState(false);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -61,7 +65,7 @@ const Home = ({ posts }: { posts: Array<Post> }) => {
             alt="Capa de perfil de João Pedro"
           />
           <Avatar className="mx-auto -mt-[30px]" />
-          <p className="font-bold mt-4">João Pedro</p>
+          <p className="font-bold mt-4">{session.data?.user?.name}</p>
           <p className="text-sm text-gray-5">Front-End Developer</p>
           <div className="pt-6 pb-8 border-t border-gray-3 mt-6">
             <button className="bg-transparent pt-4 pb-[14px] px-6 font-bold text-brand-green-light inline-flex justify-center items-center gap-[10px] rounded-lg border border-brand-green-light leading-none">
@@ -88,30 +92,7 @@ const Home = ({ posts }: { posts: Array<Post> }) => {
           </div>
 
           {posts.map((post) => (
-            <div className="bg-gray-2 rounded-lg p-10" key={post.id}>
-              <div className="grid grid-cols-[60px_1fr_auto] gap-4 items-center">
-                <Avatar />
-
-                <div>
-                  <p className="font-bold">{post.author.name}</p>
-                  <p className="text-sm text-gray-5">Dev Front-End</p>
-                </div>
-
-                <span className="text-sm text-gray-5">
-                  Publicado{' '}
-                  {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ptBR })}
-                </span>
-              </div>
-
-              <p className="whitespace-pre-wrap max-w-[75ch] mt-6">{post.content}</p>
-              <div className="mt-6 pt-6 border-t border-gray-3">
-                <p className="font-bold mb-4">Deixe seu feedback</p>
-                <Textarea placeholder="Escreva um comentário..." />
-                <button className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none mt-4">
-                  Publicar
-                </button>
-              </div>
-            </div>
+            <Post key={post.id} {...post} />
           ))}
         </div>
       </main>

@@ -1,3 +1,8 @@
+import type { GetServerSidePropsContext } from 'next';
+import { unstable_getServerSession } from 'next-auth';
+import { signIn } from 'next-auth/react';
+import { authOptions } from './api/auth/[...nextauth]';
+
 import { GitHubIcon } from '@/icons/GitHub';
 import { GoogleIcon } from '@/icons/GoogleIcon';
 import { IgniteIcon } from '@/icons/Ignite';
@@ -28,15 +33,34 @@ export default function LoginPage() {
             Entrar com o Google
           </button>
           <button className="py-3.5 bg-[#1DA1F2] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
-            <TwitterIcon width='24px' height='24px' />
+            <TwitterIcon width="24px" height="24px" />
             Entrar com o Twitter
           </button>
-          <button className="py-3.5 bg-[#171515] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
-            <GitHubIcon width='24px' height='24px' />
+          <button
+            onClick={() => signIn('github')}
+            className="py-3.5 bg-[#171515] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2"
+          >
+            <GitHubIcon width="24px" height="24px" />
             Entrar com o GitHub
           </button>
         </div>
       </div>
     </section>
   );
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+  if (session) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    };
+  }
+
+  return { props: {} };
 }
