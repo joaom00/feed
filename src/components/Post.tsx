@@ -4,6 +4,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import type { Post as PostType } from '@/pages/index';
 import { Avatar } from './Avatar';
 import { Textarea } from './Textarea';
+import { LikeButton } from '@/icons/LikeIcon';
 
 export const Post = ({ author, createdAt, content }: PostType) => {
   return (
@@ -33,10 +34,16 @@ export const Post = ({ author, createdAt, content }: PostType) => {
         <div className="grid grid-cols-[60px_1fr] gap-4 mt-8">
           <Avatar />
 
-          <div className="bg-[#29292E] rounded-lg pt-4 px-4">
-            João Pedro Magalhães
-            Cerca de 2h
+          <div className="bg-[#29292E] rounded-lg pt-4 pb-[25px] px-4">
+            <p className="text-sm text-gray-7 font-bold">João Pedro Magalhães</p>
+            <p className="text-xs text-gray-5">Cerca de 2h</p>
+            <p className="text-sm mt-4 text-gray-6">Muito bom Devon, parabéns!! 👏👏</p>
           </div>
+
+          <button className="col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px]">
+            <LikeButton />
+            Aplaudir • 03
+          </button>
         </div>
       </div>
     </div>
