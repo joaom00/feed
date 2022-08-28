@@ -1,29 +1,28 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { formatDistanceToNow } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
-import type { Post as PostType } from '@/pages/index';
-import { Avatar } from './Avatar';
-import { Textarea } from './Textarea';
 import { LikeButton } from '@/icons/LikeIcon';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { Spinner } from '@/icons/Spinner';
 
-export const Post = ({ id, author, createdAt, content, comments }: PostType) => {
+import { Avatar } from '@/components/Avatar';
+import { Textarea } from '@/components/Textarea';
+
+import { api } from '@/lib/api';
+import type { FeedPost } from '@/queries';
+
+export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
 
   const commentMutation = useMutation(
-    (data: { content: string }) =>
-      fetch(`http://localhost:3000/api/posts/${id}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      }),
+    (data: { content: string }) => api.post(`/posts/${id}/comments`, data),
     {
       onMutate: async (newComment) => {
         await queryClient.cancelQueries(['posts']);
 
-        const previousPosts = queryClient.getQueryData(['posts']) as Array<PostType>;
+        const previousPosts = queryClient.getQueryData(['posts']) as Array<FeedPost>;
 
         const newPosts = previousPosts.map((post) => {
           if (post.id === id) {
@@ -44,21 +43,18 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
           return post;
         });
 
-        queryClient.setQueryData(['posts'], newPosts)
+        queryClient.setQueryData(['posts'], newPosts);
       }
     }
   );
 
   const reactionMutation = useMutation(
-    (commentId: string) =>
-      fetch(`http://localhost:3000/api/posts/${id}/comments/${commentId}/reaction`, {
-        method: 'POST'
-      }),
+    (commentId: string) => api.post(`/posts/${id}/comments/${commentId}/reaction`),
     {
       onMutate: async (commentId) => {
         await queryClient.cancelQueries(['posts']);
 
-        const previousPosts = queryClient.getQueryData(['posts']) as Array<PostType>;
+        const previousPosts = queryClient.getQueryData(['posts']) as Array<FeedPost>;
 
         queryClient.setQueryData(['posts'], () =>
           previousPosts.map((post) =>
@@ -145,7 +141,7 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
               type="button"
               onClick={() => reactionMutation.mutate(comment.id)}
               className={`col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px] ${
-                (comment as any).isReacted ? 'text-brand-green-light' : ''
+                comment.isReacted ? 'text-brand-green-light' : ''
               }`}
             >
               <LikeButton />

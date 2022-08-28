@@ -1,8 +1,32 @@
 import { type NextApiRequest, type NextApiResponse } from 'next';
-import prisma from '@/lib/prisma';
 import { unstable_getServerSession } from 'next-auth';
+import { Prisma } from '@prisma/client';
+
+import prisma from '@/lib/prisma';
 import { authOptions } from '../auth/[...nextauth]';
-import { postsWithAuthor } from '@/pages';
+
+const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
+  orderBy: { createdAt: 'desc' },
+  include: {
+    author: true,
+    comments: {
+      orderBy: [
+        {
+          reactions: { _count: 'desc' }
+        },
+        {
+          createdAt: 'desc'
+        }
+      ],
+      include: {
+        author: true,
+        _count: {
+          select: { reactions: true }
+        }
+      }
+    }
+  }
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions);
@@ -24,7 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ...post,
           comments: post.comments.map((comment) => {
             if (reactions.some((reaction) => reaction.commentId === comment.id)) {
-
               return { ...comment, isReacted: true };
             }
             return comment;
@@ -32,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         };
       });
 
-      return res.json(finalPosts);
+      return res.json({posts: finalPosts});
     }
     case 'POST': {
       const body = JSON.parse(req.body);

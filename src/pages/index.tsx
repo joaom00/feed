@@ -1,71 +1,20 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import { Prisma } from '@prisma/client';
+import { dehydrate, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { EditIcon } from '@/icons/EditIcon';
+import { IgniteIcon } from '@/icons/Ignite';
+import { Spinner } from '@/icons/Spinner';
 
 import { Avatar } from '@/components/Avatar';
 import { Textarea } from '@/components/Textarea';
-
-import { EditIcon } from '../icons/EditIcon';
-import { IgniteIcon } from '../icons/Ignite';
-import { Spinner } from '@/icons/Spinner';
 import { Post } from '@/components/Post';
-import { unstable_getServerSession } from 'next-auth';
-import { GetServerSideProps } from 'next';
-import { authOptions } from './api/auth/[...nextauth]';
-import {
-  dehydrate,
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient
-} from '@tanstack/react-query';
 
-export const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
-  orderBy: { createdAt: 'desc' },
-  include: {
-    author: true,
-    comments: {
-      orderBy: [
-        {
-          reactions: { _count: 'desc' }
-        },
-        {
-          createdAt: 'desc'
-        }
-      ],
-      include: {
-        author: true,
-        _count: {
-          select: { reactions: true }
-        }
-      }
-    }
-  }
-});
+import { type FeedPost, fetchPosts, useFeedPosts } from '@/queries';
+import { withAuth } from '@/lib/withAuth';
+import { api } from '@/lib/api';
 
-export type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & {
-  createdAt: string;
-  comments: Array<string>;
-};
-
-async function fetchPosts() {
-  const response = await fetch('http://localhost:3000/api/posts');
-  const posts = await response.json();
-  return posts as Array<Post>;
-}
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(context.req, context.res, authOptions);
-
-  if (!session) {
-    return {
-      props: {},
-      redirect: {
-        destination: '/login'
-      }
-    };
-  }
-
+export const getServerSideProps = withAuth(async () => {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery(['posts'], fetchPosts);
 
@@ -74,27 +23,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       dehydratedState: dehydrate(queryClient)
     }
   };
-};
+});
 
 const Home = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
 
-  const postsQuery = useQuery(['posts'], fetchPosts);
-  const commentMutation = useMutation((data: Pick<Post, 'content'>) =>
-    fetch('http://localhost:3000/api/posts', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
+  const postsQuery = useFeedPosts();
+  const postMutation = useMutation(
+    (data: Pick<FeedPost, 'content'>) => api.post('/posts', data)
   );
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formElement = event.target as HTMLFormElement;
     const formData = new FormData(event.currentTarget);
-    const data = Object.fromEntries(formData.entries()) as Pick<Post, 'content'>;
+    const data = Object.fromEntries(formData.entries()) as Pick<FeedPost, 'content'>;
 
-    commentMutation.mutate(data, {
+    postMutation.mutate(data, {
       onSuccess: () => {
         formElement.reset();
       },
@@ -134,14 +80,15 @@ const Home = () => {
             </button>
           </div>
         </aside>
+
         <div className="space-y-8">
           <div className="bg-gray-2 rounded-lg p-10">
             <form onSubmit={onSubmit} className="grid grid-cols-[60px_1fr] gap-4">
-              <Avatar withBorder  
-
-            src={session?.user?.image}
-            alt={`Foto de perfil de ${session?.user?.name}`}
-                />
+              <Avatar
+                withBorder
+                src={session?.user?.image}
+                alt={`Foto de perfil de ${session?.user?.name}`}
+              />
 
               <Textarea name="content" required placeholder="Escreva um comentário..." />
 
@@ -149,7 +96,7 @@ const Home = () => {
                 type="submit"
                 className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none col-start-2 w-max"
               >
-                {commentMutation.isLoading ? <Spinner /> : null}
+                {postMutation.isLoading ? <Spinner /> : null}
                 Publicar
               </button>
             </form>
