@@ -21,19 +21,32 @@ import {
 } from '@tanstack/react-query';
 
 export const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
-  orderBy: {
-    createdAt: 'desc',
-  },
+  orderBy: { createdAt: 'desc' },
   include: {
     author: true,
     comments: {
-      orderBy: {createdAt: 'desc'},
-      include: { author: true }
+      orderBy: [
+        {
+          reactions: { _count: 'desc' }
+        },
+        {
+          createdAt: 'desc'
+        }
+      ],
+      include: {
+        author: true,
+        _count: {
+          select: { reactions: true }
+        }
+      }
     }
   }
 });
 
-export type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & { createdAt: string };
+export type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & {
+  createdAt: string;
+  comments: Array<string>;
+};
 
 async function fetchPosts() {
   const response = await fetch('http://localhost:3000/api/posts');
@@ -65,7 +78,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 const Home = () => {
   const queryClient = useQueryClient();
-  const session = useSession();
+  const { data: session } = useSession();
 
   const postsQuery = useQuery(['posts'], fetchPosts);
   const commentMutation = useMutation((data: Pick<Post, 'content'>) =>
@@ -106,8 +119,13 @@ const Home = () => {
             src="https://images.unsplash.com/photo-1661336581000-b0c41a876950?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1932&q=80"
             alt="Capa de perfil de João Pedro"
           />
-          <Avatar className="mx-auto -mt-[30px]" />
-          <p className="font-bold mt-4">{session.data?.user?.name}</p>
+          <Avatar
+            withBorder
+            src={session?.user?.image}
+            alt={`Foto de perfil de ${session?.user?.name}`}
+            className="mx-auto -mt-[30px]"
+          />
+          <p className="font-bold mt-4">{session?.user?.name}</p>
           <p className="text-sm text-gray-5">Front-End Developer</p>
           <div className="pt-6 pb-8 border-t border-gray-3 mt-6">
             <button className="bg-transparent pt-4 pb-[14px] px-6 font-bold text-brand-green-light inline-flex justify-center items-center gap-[10px] rounded-lg border border-brand-green-light leading-none">
@@ -119,7 +137,11 @@ const Home = () => {
         <div className="space-y-8">
           <div className="bg-gray-2 rounded-lg p-10">
             <form onSubmit={onSubmit} className="grid grid-cols-[60px_1fr] gap-4">
-              <Avatar />
+              <Avatar withBorder  
+
+            src={session?.user?.image}
+            alt={`Foto de perfil de ${session?.user?.name}`}
+                />
 
               <Textarea name="content" required placeholder="Escreva um comentário..." />
 

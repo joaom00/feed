@@ -34,6 +34,15 @@ module.exports = {
       },
       gridTemplateRows: {
         profile: '72px 1fr'
+      },
+      keyframes: {
+        slideDownAndFade: {
+          '0%': { transform: 'translateY(-15px)' },
+          '100%': { transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        slideDownAndFade: 'slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)'
       }
     }
   },

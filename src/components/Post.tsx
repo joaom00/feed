@@ -25,19 +25,60 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
 
         const previousPosts = queryClient.getQueryData(['posts']) as Array<PostType>;
 
+        const newPosts = previousPosts.map((post) => {
+          if (post.id === id) {
+            return {
+              ...post,
+              comments: [
+                {
+                  id: new Date().getTime(),
+                  createdAt: new Date().toISOString(),
+                  author: { name: session?.user?.name, image: session?.user?.image },
+                  _count: { reactions: 0 },
+                  ...newComment
+                },
+                ...post.comments
+              ]
+            };
+          }
+          return post;
+        });
+
+        queryClient.setQueryData(['posts'], newPosts)
+      }
+    }
+  );
+
+  const reactionMutation = useMutation(
+    (commentId: string) =>
+      fetch(`http://localhost:3000/api/posts/${id}/comments/${commentId}/reaction`, {
+        method: 'POST'
+      }),
+    {
+      onMutate: async (commentId) => {
+        await queryClient.cancelQueries(['posts']);
+
+        const previousPosts = queryClient.getQueryData(['posts']) as Array<PostType>;
+
         queryClient.setQueryData(['posts'], () =>
           previousPosts.map((post) =>
             post.id === id
               ? {
                   ...post,
-                  comments: [
-                    {
-                      ...newComment,
-                      createdAt: new Date().toISOString(),
-                      author: { name: session?.user?.name }
-                    },
-                    ...post.comments
-                  ]
+                  comments: post.comments.map((comment) => {
+                    if (comment.id === commentId) {
+                      return {
+                        ...comment,
+                        _count: {
+                          reactions: (comment as any).isReacted
+                            ? comment._count.reactions - 1
+                            : comment._count.reactions + 1
+                        },
+                        isReacted: !(comment as any).isReacted
+                      };
+                    }
+                    return comment;
+                  })
                 }
               : post
           )
@@ -47,9 +88,9 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
   );
 
   return (
-    <div className="bg-gray-2 rounded-lg p-10">
+    <div className="bg-gray-2 rounded-lg p-10 transform animate-slideDownAndFade">
       <div className="grid grid-cols-[60px_1fr_auto] gap-4 items-center">
-        <Avatar />
+        <Avatar withBorder src={author.image} alt={`Foto de perfil de ${author.name}`} />
 
         <div>
           <p className="font-bold">{author.name}</p>
@@ -78,7 +119,7 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
         className="mt-6 pt-6 border-t border-gray-3"
       >
         <p className="font-bold mb-4">Deixe seu feedback</p>
-        <Textarea name="content" placeholder="Escreva um comentário..." />
+        <Textarea name="content" placeholder="Escreva um comentário..." required />
         <button
           type="submit"
           disabled={commentMutation.isLoading}
@@ -90,7 +131,7 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
 
         {comments.map((comment) => (
           <div key={comment.id} className="grid grid-cols-[60px_1fr] gap-4 mt-8">
-            <Avatar />
+            <Avatar src={comment.author.image} alt={`Foto de perfil de ${comment.author.name}`} />
 
             <div className="bg-[#29292E] rounded-lg pt-4 pb-[25px] px-4">
               <p className="text-sm text-gray-7 font-bold">{comment.author.name}</p>
@@ -100,9 +141,15 @@ export const Post = ({ id, author, createdAt, content, comments }: PostType) => 
               <p className="text-sm mt-4 text-gray-6">{comment.content}</p>
             </div>
 
-            <button className="col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px]">
+            <button
+              type="button"
+              onClick={() => reactionMutation.mutate(comment.id)}
+              className={`col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px] ${
+                (comment as any).isReacted ? 'text-brand-green-light' : ''
+              }`}
+            >
               <LikeButton />
-              Aplaudir • 03
+              Aplaudir • {comment._count.reactions}
             </button>
           </div>
         ))}

@@ -1,17 +1,18 @@
-interface AvatarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface AvatarProps extends React.ComponentPropsWithoutRef<'div'> {
+  withBorder?: boolean;
+  src: string | undefined | null;
+  alt: string;
+}
 
-export const Avatar = ({ className, ...props }: AvatarProps) => {
+export const Avatar = ({ src = '', alt, withBorder = false, className, ...props }: AvatarProps) => {
   return (
     <div
       {...props}
-      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 border-2 border-brand-green-light flex justify-center items-center select-none ${className}`}
+      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 flex justify-center items-center select-none ${
+        withBorder ? 'border-2 border-brand-green-light' : ''
+      } ${className}`}
     >
-      <img
-        draggable={false}
-        className="w-[49px] h-[49px] rounded-[5px]"
-        src="https://github.com/joaom00.png"
-        alt="Foto de perfil de João Pedro"
-      />
+      <img draggable={false} className="w-[49px] h-[49px] rounded-[5px]" src={src ?? ''} alt={alt} />
     </div>
   );
 };
