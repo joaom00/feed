@@ -2,8 +2,6 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import { Prisma } from '@prisma/client';
 
-import prisma from '@/lib/prisma';
-
 import { Avatar } from '@/components/Avatar';
 import { Textarea } from '@/components/Textarea';
 
@@ -11,42 +9,86 @@ import { EditIcon } from '../icons/EditIcon';
 import { IgniteIcon } from '../icons/Ignite';
 import { Spinner } from '@/icons/Spinner';
 import { Post } from '@/components/Post';
+import { unstable_getServerSession } from 'next-auth';
+import { GetServerSideProps } from 'next';
+import { authOptions } from './api/auth/[...nextauth]';
+import {
+  dehydrate,
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient
+} from '@tanstack/react-query';
 
-const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
+export const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
   orderBy: {
-    createdAt: 'desc'
+    createdAt: 'desc',
   },
-  include: { author: true }
+  include: {
+    author: true,
+    comments: {
+      orderBy: {createdAt: 'desc'},
+      include: { author: true }
+    }
+  }
 });
 
 export type Post = Prisma.PostGetPayload<typeof postsWithAuthor> & { createdAt: string };
 
-export const getServerSideProps = async () => {
-  const posts = await prisma.post.findMany(postsWithAuthor);
+async function fetchPosts() {
+  const response = await fetch('http://localhost:3000/api/posts');
+  const posts = await response.json();
+  return posts as Array<Post>;
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(context.req, context.res, authOptions);
+
+  if (!session) {
+    return {
+      props: {},
+      redirect: {
+        destination: '/login'
+      }
+    };
+  }
+
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery(['posts'], fetchPosts);
 
   return {
     props: {
-      posts: JSON.parse(JSON.stringify(posts))
+      dehydratedState: dehydrate(queryClient)
     }
   };
 };
 
-const Home = ({ posts }: { posts: Array<Post> }) => {
+const Home = () => {
+  const queryClient = useQueryClient();
   const session = useSession();
-  const [isLoading, setIsLoading] = React.useState(false);
+
+  const postsQuery = useQuery(['posts'], fetchPosts);
+  const commentMutation = useMutation((data: Pick<Post, 'content'>) =>
+    fetch('http://localhost:3000/api/posts', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  );
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formElement = event.target as HTMLFormElement;
     const formData = new FormData(event.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    setIsLoading(true);
-    await fetch('http://localhost:3000/api/posts', {
-      method: 'POST',
-      body: JSON.stringify(data)
+    const data = Object.fromEntries(formData.entries()) as Pick<Post, 'content'>;
+
+    commentMutation.mutate(data, {
+      onSuccess: () => {
+        formElement.reset();
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['posts']);
+      }
     });
-    setIsLoading(false);
-    formElement.reset();
   };
 
   return (
@@ -85,13 +127,13 @@ const Home = ({ posts }: { posts: Array<Post> }) => {
                 type="submit"
                 className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none col-start-2 w-max"
               >
-                {isLoading ? <Spinner /> : null}
+                {commentMutation.isLoading ? <Spinner /> : null}
                 Publicar
               </button>
             </form>
           </div>
 
-          {posts.map((post) => (
+          {postsQuery.data?.map((post) => (
             <Post key={post.id} {...post} />
           ))}
         </div>

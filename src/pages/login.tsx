@@ -13,7 +13,7 @@ export default function LoginPage() {
     <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] min-h-screen">
       <img className="w-full h-full object-cover hidden lg:block" src="/login.jpg" alt="" />
 
-      <div className="py-[62px] px-16 bg-gray-2">
+      <div className="pt-[62px] px-16 bg-gray-2">
         <p className="text-2xl font-bold text-gray-7 flex items-center gap-4">
           <IgniteIcon />
           Ignite Feed

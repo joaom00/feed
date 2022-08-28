@@ -1,10 +1,15 @@
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
 import { unstable_getServerSession } from 'next-auth';
-import { authOptions } from './auth/[...nextauth]';
+import { authOptions } from '../auth/[...nextauth]';
+import { postsWithAuthor } from '@/pages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
+    case 'GET': {
+      const posts = await prisma.post.findMany(postsWithAuthor);
+      return res.json(posts);
+    }
     case 'POST': {
       const session = await unstable_getServerSession(req, res, authOptions);
       if (!session) return res.status(402).send('Unauthorized');
@@ -23,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.json(response);
     }
     default: {
-      return res.setHeader('Allow', 'POST');
+      return res.setHeader('Allow', ['GET', 'POST']);
     }
   }
 }
