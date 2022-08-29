@@ -119,7 +119,7 @@ export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => 
         <button
           type="submit"
           disabled={commentMutation.isLoading}
-          className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none mt-4"
+          className="bg-brand-green pt-4 pb-[14px] px-6 font-bold text-white inline-flex justify-center items-center gap-[10px] rounded-lg leading-none mt-4 hover:bg-brand-green-light transition-colors ease-linear"
         >
           {commentMutation.isLoading ? <Spinner /> : null}
           Publicar
@@ -140,8 +140,8 @@ export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => 
             <button
               type="button"
               onClick={() => reactionMutation.mutate(comment.id)}
-              className={`col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px] ${
-                comment.isReacted ? 'text-brand-green-light' : ''
+              className={`col-start-2 text-sm font-bold text-gray-5 flex items-center gap-[10px] transition-colors ease-linear  ${
+                comment.isReacted ? 'text-brand-green-light' : 'hover:text-gray-7'
               }`}
             >
               <LikeButton />

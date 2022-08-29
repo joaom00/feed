@@ -33,7 +33,8 @@ module.exports = {
         main: '256px 1fr'
       },
       gridTemplateRows: {
-        profile: '72px 1fr'
+        'profile-aside': '72px 1fr',
+        profile: '164px 1fr'
       },
       keyframes: {
         slideDownAndFade: {

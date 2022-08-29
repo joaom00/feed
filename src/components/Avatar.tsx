@@ -8,11 +8,11 @@ export const Avatar = ({ src = '', alt, withBorder = false, className, ...props 
   return (
     <div
       {...props}
-      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 flex justify-center items-center select-none ${
+      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 p-1 select-none ${
         withBorder ? 'border-2 border-brand-green-light' : ''
       } ${className}`}
     >
-      <img draggable={false} className="w-[49px] h-[49px] rounded-[5px]" src={src ?? ''} alt={alt} />
+      <img draggable={false} className="rounded-[5px]" src={src ?? ''} alt={alt} />
     </div>
   );
 };

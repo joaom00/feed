@@ -2,7 +2,10 @@ import React from 'react';
 import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { Hydrate, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {ReactQueryDevtools} from '@tanstack/react-query-devtools'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+import { Header, HeaderProvider } from '@/components/Header';
+
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
@@ -12,10 +15,13 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <SessionProvider session={session}>
-          <Component {...pageProps} />
+          <HeaderProvider>
+            <Header />
+            <Component {...pageProps} />
+          </HeaderProvider>
         </SessionProvider>
       </Hydrate>
-        <ReactQueryDevtools />
+      <ReactQueryDevtools />
     </QueryClientProvider>
   );
 }
