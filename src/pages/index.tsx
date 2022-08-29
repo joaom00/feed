@@ -2,6 +2,8 @@ import React from 'react';
 import { useSession } from 'next-auth/react';
 import { dehydrate, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type { NextPageWithLayout } from './_app';
+
 import { EditIcon } from '@/icons/EditIcon';
 import { Spinner } from '@/icons/Spinner';
 
@@ -13,6 +15,7 @@ import { type FeedPost, fetchPosts, useFeedPosts } from '@/queries';
 import { withAuth } from '@/lib/withAuth';
 import { api } from '@/lib/api';
 import Link from 'next/link';
+import { Header } from '@/components/Header';
 
 export const getServerSideProps = withAuth(async () => {
   const queryClient = new QueryClient();
@@ -25,7 +28,7 @@ export const getServerSideProps = withAuth(async () => {
   };
 });
 
-const Home = () => {
+const Home: NextPageWithLayout = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
 
@@ -63,14 +66,13 @@ const Home = () => {
           className="mx-auto -mt-[30px]"
         />
         <p className="font-bold mt-4">{session?.user?.name}</p>
-        <p className="text-sm text-gray-5">Front-End Developer</p>
+        <p className="text-sm text-gray-5">{session?.user.bio}</p>
         <div className="pt-6 pb-8 border-t border-gray-3 mt-6">
-          <Link href='/profile'>
-
-          <a className="bg-transparent pt-4 pb-[14px] px-6 font-bold text-brand-green-light inline-flex justify-center items-center gap-[10px] rounded-lg border border-brand-green-light leading-none hover:bg-brand-green hover:text-white hover:border-brand-green transition-colors ease-linear">
-            <EditIcon />
-            Editar seu perfil
-          </a>
+          <Link href="/profile">
+            <a className="bg-transparent pt-4 pb-[14px] px-6 font-bold text-brand-green-light inline-flex justify-center items-center gap-[10px] rounded-lg border border-brand-green-light leading-none hover:bg-brand-green hover:text-white hover:border-brand-green transition-colors ease-linear">
+              <EditIcon />
+              Editar seu perfil
+            </a>
           </Link>
         </div>
       </aside>
@@ -101,6 +103,15 @@ const Home = () => {
         ))}
       </div>
     </main>
+  );
+};
+
+Home.getLayout = (page) => {
+  return (
+    <>
+      <Header />
+      {page}
+    </>
   );
 };
 

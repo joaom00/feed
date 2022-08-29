@@ -14,5 +14,14 @@ export const api = {
     });
     const data = await response.json();
     return data as T;
+  },
+  put: async <T>(url: string, body?: Record<string, unknown>, init?: Omit<RequestInit, 'body'>) => {
+    const response = await fetch(`${API_URL}${url}`, {
+      ...init,
+      method: 'PUT',
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    return data as T;
   }
 };

@@ -1,5 +1,3 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSession } from 'next-auth/react';
 import { formatDistanceToNow } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 
@@ -9,79 +7,23 @@ import { Spinner } from '@/icons/Spinner';
 import { Avatar } from '@/components/Avatar';
 import { Textarea } from '@/components/Textarea';
 
-import { api } from '@/lib/api';
-import type { FeedPost } from '@/queries';
+import { FeedPost, useCommentMutation, useReactionMutation } from '@/queries';
 
 export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => {
-  const queryClient = useQueryClient();
-  const { data: session } = useSession();
+  const commentMutation = useCommentMutation(id);
+  const reactionMutation = useReactionMutation(id);
 
-  const commentMutation = useMutation(
-    (data: { content: string }) => api.post(`/posts/${id}/comments`, data),
-    {
-      onMutate: async (newComment) => {
-        await queryClient.cancelQueries(['posts']);
-
-        const previousPosts = queryClient.getQueryData(['posts']) as Array<FeedPost>;
-
-        const newPosts = previousPosts.map((post) => {
-          if (post.id === id) {
-            return {
-              ...post,
-              comments: [
-                {
-                  id: new Date().getTime(),
-                  createdAt: new Date().toISOString(),
-                  author: { name: session?.user?.name, image: session?.user?.image },
-                  _count: { reactions: 0 },
-                  ...newComment
-                },
-                ...post.comments
-              ]
-            };
-          }
-          return post;
-        });
-
-        queryClient.setQueryData(['posts'], newPosts);
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries()) as { content: string };
+    commentMutation.mutate(data, {
+      onSuccess: () => {
+        form.reset();
       }
-    }
-  );
-
-  const reactionMutation = useMutation(
-    (commentId: string) => api.post(`/posts/${id}/comments/${commentId}/reaction`),
-    {
-      onMutate: async (commentId) => {
-        await queryClient.cancelQueries(['posts']);
-
-        const previousPosts = queryClient.getQueryData(['posts']) as Array<FeedPost>;
-
-        queryClient.setQueryData(['posts'], () =>
-          previousPosts.map((post) =>
-            post.id === id
-              ? {
-                  ...post,
-                  comments: post.comments.map((comment) => {
-                    if (comment.id === commentId) {
-                      return {
-                        ...comment,
-                        _count: {
-                          reactions: (comment as any).isReacted
-                            ? comment._count.reactions - 1
-                            : comment._count.reactions + 1
-                        },
-                        isReacted: !(comment as any).isReacted
-                      };
-                    }
-                    return comment;
-                  })
-                }
-              : post
-          )
-        );
-      }
-    }
-  );
+    });
+  };
 
   return (
     <div className="bg-gray-2 rounded-lg p-10 transform animate-slideDownAndFade">
@@ -90,7 +32,7 @@ export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => 
 
         <div>
           <p className="font-bold">{author.name}</p>
-          <p className="text-sm text-gray-5">Dev Front-End</p>
+          <p className="text-sm text-gray-5">{author.bio}</p>
         </div>
 
         <span className="text-sm text-gray-5">
@@ -100,20 +42,7 @@ export const Post = ({ id, author, createdAt, content, comments }: FeedPost) => 
 
       <p className="whitespace-pre-wrap max-w-[75ch] mt-6">{content}</p>
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          const formData = new FormData(event.currentTarget);
-          const data = Object.fromEntries(formData.entries()) as { content: string };
-          commentMutation.mutate(data, {
-            onSuccess: () => {
-              const form = event.target as HTMLFormElement;
-              form.reset();
-            }
-          });
-        }}
-        className="mt-6 pt-6 border-t border-gray-3"
-      >
+      <form onSubmit={onSubmit} className="mt-6 pt-6 border-t border-gray-3">
         <p className="font-bold mb-4">Deixe seu feedback</p>
         <Textarea name="content" placeholder="Escreva um comentário..." required />
         <button
