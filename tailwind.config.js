@@ -37,12 +37,22 @@ module.exports = {
         profile: '164px 1fr'
       },
       keyframes: {
+        overlayShow: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        contentShow: {
+          '0%': { opacity: '0', transform: 'translate(-50%, -48%) scale(.96)' },
+          '100%': { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' }
+        },
         slideDownAndFade: {
           '0%': { transform: 'translateY(-15px)' },
           '100%': { transform: 'translateY(0)' }
         }
       },
       animation: {
+        overlayShow: 'overlayShow 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+        contentShow: 'contentShow 200ms cubic-bezier(0.16, 1, 0.3, 1)',
         slideDownAndFade: 'slideDownAndFade 400ms cubic-bezier(0.16, 1, 0.3, 1)'
       }
     }

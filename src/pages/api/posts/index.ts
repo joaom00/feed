@@ -30,7 +30,6 @@ const postsWithAuthor = Prisma.validator<Prisma.PostFindManyArgs>()({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await unstable_getServerSession(req, res, authOptions);
-  if (!session) return res.status(402).send('Unauthorized');
 
   switch (req.method) {
     case 'GET': {
@@ -38,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const reactions = await prisma.reaction.findMany({
         where: {
           user: {
-            email: session.user?.email ?? ''
+            email: session?.user?.email ?? ''
           }
         }
       });
@@ -55,9 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         };
       });
 
-      return res.json({posts: finalPosts});
+      return res.json({ posts: finalPosts });
     }
     case 'POST': {
+      if (!session) return res.status(402).send('Unauthorized');
       const body = JSON.parse(req.body);
       const content = body.content;
       const response = await prisma.post.create({

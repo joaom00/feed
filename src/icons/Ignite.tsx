@@ -1,12 +1,15 @@
-export const IgniteIcon = () => {
+import type { SVGProps } from 'react';
+
+export const IgniteIcon = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg
       width="65"
       height="61"
-      viewBox="0 0 65 61"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
       aria-hidden
+      viewBox="0 0 65 61"
     >
       <path
         opacity="0.5"

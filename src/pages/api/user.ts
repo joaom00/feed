@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           bio: body.bio
         }
       });
-      return res.send('ok')
+      return res.status(200).send('ok');
     }
     default: {
       res.setHeader('Allow', 'PUT');

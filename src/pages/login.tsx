@@ -6,7 +6,6 @@ import { authOptions } from './api/auth/[...nextauth]';
 import { GitHubIcon } from '@/icons/GitHub';
 import { GoogleIcon } from '@/icons/GoogleIcon';
 import { IgniteIcon } from '@/icons/Ignite';
-import { TwitterIcon } from '@/icons/TwitterIcon';
 
 export default function LoginPage() {
   return (
@@ -28,13 +27,12 @@ export default function LoginPage() {
         </p>
 
         <div className="space-y-6">
-          <button className="py-3.5 bg-[#EA4335] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
+          <button
+            onClick={() => signIn('google')}
+            className="py-3.5 bg-[#EA4335] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2"
+          >
             <GoogleIcon width="24px" height="24px" />
             Entrar com o Google
-          </button>
-          <button className="py-3.5 bg-[#1DA1F2] rounded-lg w-full text-white font-bold inline-flex justify-center items-center gap-2">
-            <TwitterIcon width="24px" height="24px" />
-            Entrar com o Twitter
           </button>
           <button
             onClick={() => signIn('github')}
