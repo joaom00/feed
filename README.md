@@ -26,7 +26,7 @@
 
 ## 🚧 Projeto
 
-Live Preview: https://github-blog-fawn.vercel.app/
+Live Preview: https://feed-joaom00.vercel.app/
 
 Figma: https://www.figma.com/community/file/1113573231685349036
 
