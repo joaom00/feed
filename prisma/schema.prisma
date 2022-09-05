@@ -14,7 +14,7 @@ datasource db {
 
 model Post {
   id        String    @id @default(cuid())
-  content   String
+  content   String @db.Text()
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   author    User      @relation(fields: [authorId], references: [id])
@@ -24,7 +24,7 @@ model Post {
 
 model Comment {
   id        String     @id @default(cuid())
-  content   String
+  content   String @db.Text()
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   author    User       @relation(fields: [authorId], references: [id])

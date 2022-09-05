@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case 'PUT': {
       const session = await unstable_getServerSession(req, res, authOptions);
       if (!session) return res.send('Unauthorized');
-      const body = JSON.parse(req.body);
+      const body = req.body;
       await prisma.user.update({
         where: {
           email: session.user?.email ?? ''

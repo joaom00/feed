@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const session = await unstable_getServerSession(req, res, authOptions);
       if (!session) return res.status(402).send('Unauthorized');
       const id = req.query.id as string;
-      const body = JSON.parse(req.body);
+      const body = req.body;
       const content = body.content;
       const response = await prisma.comment.create({
         data: {

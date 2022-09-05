@@ -29,7 +29,7 @@ interface ProfilePageProps {
 }
 
 const ProfilePage: NextPageWithLayout<ProfilePageProps> = ({ user }) => {
-  const profileMutation = useMutation((data: ProfilePageProps['user']) => api.put('/user', data));
+  const profileMutation = useMutation((data: ProfilePageProps['user']) => api.put('/api/user', data));
 
   const [stringifiedUserData, setStringifiedUserData] = React.useState(
     JSON.stringify({ name: user?.name, bio: user.bio })

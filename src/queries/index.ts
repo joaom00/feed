@@ -19,7 +19,7 @@ export interface FeedPost extends PrismaPost {
 }
 
 export async function fetchPosts() {
-  const data = await api.get<{ posts: Array<FeedPost> }>('/posts');
+  const { data } = await api.get<{ posts: Array<FeedPost> }>('/api/posts');
   return data.posts;
 }
 
@@ -37,7 +37,7 @@ export function useCommentMutation(id: string) {
 
   return useMutation(
     (payload: CommentMutationPayload) =>
-      api.post(`/posts/${id}/comments`, { content: payload.content }),
+      api.post(`/api/posts/${id}/comments`, { content: payload.content }),
     {
       onMutate: async (newComment) => {
         await queryClient.cancelQueries(['posts']);
@@ -73,7 +73,7 @@ export function useReactionMutation(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (commentId: string) => api.post(`/posts/${id}/comments/${commentId}/reaction`),
+    (commentId: string) => api.post(`/api/posts/${id}/comments/${commentId}/reaction`),
     {
       onMutate: async (commentId) => {
         await queryClient.cancelQueries(['posts']);

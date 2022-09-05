@@ -39,7 +39,9 @@ const HomePage: NextPageWithLayout<HomePageProps> = ({ user }) => {
   const queryClient = useQueryClient();
 
   const postsQuery = useFeedPosts();
-  const postMutation = useMutation((data: Pick<FeedPost, 'content'>) => api.post('/posts', data));
+  const postMutation = useMutation((data: Pick<FeedPost, 'content'>) =>
+    api.post('/api/posts', data)
+  );
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -67,7 +69,7 @@ const HomePage: NextPageWithLayout<HomePageProps> = ({ user }) => {
         <ProfileAside user={user} />
       </OnlyAuth>
 
-      <div className="space-y-8">
+      <div className={`space-y-8 ${user ? 'lg:col-start-2' : ''}`}>
         <OnlyAuth>
           <div className="bg-gray-2 rounded-lg p-5 md:p-10">
             <form onSubmit={onSubmit} className="md:grid md:grid-cols-[60px_1fr] gap-4">

@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     case 'POST': {
       if (!session) return res.status(402).send('Unauthorized');
-      const body = JSON.parse(req.body);
+      const body = req.body;
       const content = body.content;
       const response = await prisma.post.create({
         data: {

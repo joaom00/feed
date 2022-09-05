@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HeaderProvider } from '@/components/Header';
 
 import '../styles/globals.css';
+import Head from 'next/head';
 
 export type NextPageWithLayout<Props = {}, InitialProps = Props> = NextPage<Props, InitialProps> & {
   getLayout?: (page: React.ReactElement) => React.ReactNode;
@@ -26,6 +27,9 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppPropsWith
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <SessionProvider session={session}>
+          <Head>
+            <title>Feed</title>
+          </Head>
           <HeaderProvider>{getLayout(<Component {...pageProps} />)}</HeaderProvider>
         </SessionProvider>
       </Hydrate>

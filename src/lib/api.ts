@@ -1,27 +1,6 @@
-const API_URL = 'http://localhost:3000/api';
+import axios from 'axios'
 
-export const api = {
-  get: async <T>(url: string, init?: Omit<RequestInit, 'body'>) => {
-    const response = await fetch(`${API_URL}${url}`, init);
-    const data = await response.json();
-    return data as T;
-  },
-  post: async <T>(url: string, body?: Record<string, unknown>, init?: Omit<RequestInit, 'body'>) => {
-    const response = await fetch(`${API_URL}${url}`, {
-      ...init,
-      method: 'POST',
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    return data as T;
-  },
-  put: async <T>(url: string, body?: Record<string, unknown>, init?: Omit<RequestInit, 'body'>) => {
-    const response = await fetch(`${API_URL}${url}`, {
-      ...init,
-      method: 'PUT',
-      body: JSON.stringify(body)
-    });
-    const data = await response.json();
-    return data as T;
-  }
-};
+export const api = axios.create({
+  baseURL: process.env.BASE_API_URL
+})
+
