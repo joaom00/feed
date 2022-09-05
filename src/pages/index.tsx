@@ -62,15 +62,13 @@ const HomePage: NextPageWithLayout<HomePageProps> = ({ user }) => {
   return (
     <main
       className={`mt-8 max-w-[1120px] w-full mx-auto grid gap-8 pb-20 px-3 ${
-        user ? 'grid-cols-1 lg:grid-cols-main' : 'grid-cols-[832px] justify-center'
+        Boolean(user) ? 'grid-cols-1 lg:grid-cols-main' : 'grid-cols-1 justify-center'
       }`}
     >
-      <OnlyAuth>
-        <ProfileAside user={user} />
-      </OnlyAuth>
+      {Boolean(user) ? <ProfileAside user={user} /> : null}
 
-      <div className={`space-y-8 ${user ? 'lg:col-start-2' : ''}`}>
-        <OnlyAuth>
+      <div className={`space-y-8 ${user ? 'lg:col-start-2' : 'max-w-[832px] mx-auto'}`}>
+        {Boolean(user) ? (
           <div className="bg-gray-2 rounded-lg p-5 md:p-10">
             <form onSubmit={onSubmit} className="md:grid md:grid-cols-[60px_1fr] gap-4">
               <Avatar
@@ -91,7 +89,7 @@ const HomePage: NextPageWithLayout<HomePageProps> = ({ user }) => {
               </button>
             </form>
           </div>
-        </OnlyAuth>
+        ) : null}
 
         {postsQuery.data?.map((post) => (
           <Post key={post.id} {...post} />

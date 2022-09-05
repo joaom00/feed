@@ -12,7 +12,7 @@ export const Avatar = ({ src = '', alt, withBorder = false, className, ...props 
   return (
     <AvatarPrimitive.Root
       {...props}
-      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 p-1 select-none ${
+      className={`w-[60px] h-[60px] rounded-lg bg-gray-2 p-1 select-none block ${
         withBorder ? 'border-2 border-brand-green-light' : ''
       } ${className}`}
     >
