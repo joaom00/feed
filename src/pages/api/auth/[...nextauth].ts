@@ -21,9 +21,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET
     }),
     GoogleProvider({
-clientId: process.env.GOOGLE_CLIENT_ID,
+      clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET
-    }),
+    })
   ],
   callbacks: {
     async session({ session, user: userSession }) {
